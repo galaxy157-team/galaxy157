@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "198915640498",
+    "project_id": "galaxy157-01",
+    "storage_bucket": "galaxy157-01.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:198915640498:android:e3a37de312f9cd34220dab",
+        "android_client_info": {
+          "package_name": "com.example.study01"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8vCqUH-zN42LozsGisFeJUT5WnUWMUfo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
