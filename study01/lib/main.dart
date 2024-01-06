@@ -1,98 +1,108 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'registration.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MaterialApp(home: ChatBotPage()));
+void main() {
+  runApp(MyApp());
 }
 
-class ChatBotPage extends StatefulWidget {
+class MyApp extends StatelessWidget {
   @override
-  _ChatBotPageState createState() => _ChatBotPageState();
-}
-
-class _ChatBotPageState extends State<ChatBotPage> {
-  String _currentStep = 'start';
-  final List<Map<String, String>> _chatMessages = [];
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+      ),
+      home: MyHomePage(),
+    );
   }
+}
 
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("ChatBot")),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: _chatMessages.length,
-              itemBuilder: (context, index) {
-                var message = _chatMessages[index];
-                return ListTile(
-                  title: Text(message['text'] ?? ''),
-                  subtitle: Text(message['type'] ?? 'response'),
-                );
-              },
+      appBar: AppBar(
+        // title: Text("Welcome!"),
+        backgroundColor: Color(0xFF4D7EA8), // AppBarの背景色を設定
+      ),
+      backgroundColor: Color(0xFFB6C2D9), // 全体の背景色を設定
+      body: Container(
+        color: Color(0xFFB6C2D9), // ログイン画面部分の背景色を設定
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  Text("ChatBot(仮)", style: TextStyle(fontSize: 50)),
+                  Text("ログインしてください"),
+                ],
+              ),
             ),
-          ),
-          _buildInputSection(),
-        ],
+            CustomTextField(label: "メールアドレス"),
+            CustomTextField(label: "パスワード"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("新規登録は"),
+                TextButton(
+                  onPressed: () {
+                    // 以下の行は Registration クラスが存在する場合にのみ有効
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Registration()),
+                    );
+                  },
+                  child: Text("こちら"),
+                ),
+              ],
+            ),
+            ElevatedButton(
+              onPressed: () {},
+              child: Container(
+                width: 200,
+                height: 50,
+                alignment: Alignment.center,
+                child: Text('ログイン', textAlign: TextAlign.center),
+              ),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Color(0xFFC6C7C4)), // ボタンの背景色を設定
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildInputSection() {
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('chat_steps').doc(_currentStep).snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return CircularProgressIndicator();
-        var data = snapshot.data?.data() as Map<String, dynamic>?;
+class CustomTextField extends StatelessWidget {
+  final String label;
 
-        return ListView(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            if (data != null) Text(data['question']),
-            ..._buildChoices(data),
-          ],
-        );
-      },
+  CustomTextField({
+    required this.label,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        onChanged: (newText) {},
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+        ),
+      ),
     );
-  }
-
-  List<Widget> _buildChoices(Map<String, dynamic>? data) {
-    if (data == null || !data.containsKey('choices')) return [];
-    return data['choices'].map<Widget>((choice) {
-      return ElevatedButton(
-        child: Text(choice['text']),
-        onPressed: () {
-          setState(() {
-            _chatMessages.add({'text': choice['text'], 'type': 'choice'});
-            _currentStep = choice['next_step'];
-            _scrollToBottom();
-          });
-        },
-      );
-    }).toList();
-  }
-
-  void _scrollToBottom() {
-    Future.delayed(Duration(milliseconds: 100), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
-      }
-    });
   }
 }
